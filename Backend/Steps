@@ -1,0 +1,45 @@
+added code in global.asx for serialization error:
+using System.Data.Entity;
+GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings
+    .ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            GlobalConfiguration.Configuration.Formatters
+                .Remove(GlobalConfiguration.Configuration.Formatters.XmlFormatter);
+
+
+category.cs:
+ [DisplayName("Upload Image")]
+public string cImage { get; set; }
+
+    public HttpPostedFileBase ImageFile { get; set; }
+
+
+actionresult create:
+ if (ModelState.IsValid)
+            {
+                string fileName = Path.GetFileNameWithoutExtension(category.ImageFile.FileName);
+                string extension= Path.GetExtension(category.ImageFile.FileName);
+                fileName = fileName + DateTime.Now.ToString("yymmssfff")+extension;
+                //cImage contains the path for the image
+                category.cImage = "~/Images/Category/" + fileName;
+                fileName = Path.Combine(Server.MapPath("~/Images/Category/"),fileName);
+                category.ImageFile.SaveAs(fileName);
+                using(BookStoreDBEntities db = new BookStoreDBEntities())
+                {
+                    db.Categories.Add(category);
+                    db.SaveChanges();
+                }
+                return RedirectToAction("Index");
+
+            }
+            ModelState.Clear();
+            return View(category);
+
+create.cshtml:
+  <input type="file" name="ImageFile" required />
+
+
+
+make changes for delete and display
+change item to Model
+
+CHANGES IN CATEGORY AND BOOK MVC CONTROLLERS AND THEIR VIEWS
